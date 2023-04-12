@@ -89,6 +89,7 @@ export class Github {
                                         }
                                     }
                                     updatedAt
+                                    stargazerCount
                                 }
                             }
                         }
@@ -137,6 +138,7 @@ export class Github {
                                         }
                                     }
                                     updatedAt
+                                    stargazerCount
                                 }
                             }
                         }

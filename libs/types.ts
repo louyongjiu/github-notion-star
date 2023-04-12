@@ -23,6 +23,7 @@ export interface RepoBase {
     starredAt: string;
     primaryLanguage: Language;
     updatedAt: string;
+    stargazerCount: number; 
 }
 
 export interface Repo extends RepoBase {
