@@ -131,6 +131,10 @@ export class Notion {
                         end: repo.starredAt,
                     },
                 },
+                'Stargazers': {
+                    type: 'number',
+                    number: repo.stargazerCount,
+                },
             },
         });
 
