@@ -107,8 +107,8 @@ export class Notion {
                             type: 'text',
                             text: {
                                 content: repo.description && repo.description.length >= 2000
-                                ? repo.description.slice(0, 120) + "..."
-                                : repo.description || "",
+                                    ? repo.description.slice(0, 120) + "..."
+                                    : repo.description || "",
                             },
                         },
                     ],
@@ -121,13 +121,32 @@ export class Notion {
                 },
                 'Repository Topics': {
                     type: 'rich_text',
-                    rich_text: [
-                        {
-                        type: 'text',
-                        text: {
-                            content:  repo.repositoryTopics ? repo.repositoryTopics.map((topic) => topic.name).join(',') :'',
-                        },
-                    }]
+                    rich_text: repo.repositoryTopics
+                        ? repo.repositoryTopics.flatMap((topic, index) => [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: topic.name,
+                                    link: `https://github.com/topics/${topic.name}`,
+                                },
+                            },
+                            index < repo.repositoryTopics.length - 1
+                                ? {
+                                    type: 'text',
+                                    text: {
+                                        content: ',',
+                                    },
+                                }
+                                : null,
+                        ])
+                        : [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: '',
+                                },
+                            },
+                        ],
                 },
                 'Starred At': {
                     type: 'date',
