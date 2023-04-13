@@ -2,6 +2,7 @@ import { Client } from '@notionhq/client';
 import { NotionPage, Repo } from './types';
 import { DatabasesQueryResponse } from '@notionhq/client/build/src/api-endpoints';
 import { get, save } from './cache';
+import { RichTextInput } from '@notionhq/client/build/src/api-types';
 
 // TODO: add assertion
 const databaseId = process.env.NOTION_DATABASE_ID as string;
@@ -74,6 +75,38 @@ export class Notion {
     }
 
     async insertPage(repo: Repo) {
+        const richTextArray: RichTextInput[] = repo.repositoryTopics
+        ? repo.repositoryTopics.flatMap((topic, index, array) => {
+            const items = [
+              {
+                type: 'text',
+                text: {
+                  content: topic.name,
+                //   link: topic ? `https://github.com/topics/${topic.name}` : null,
+                },
+              },
+            ];
+            
+            if (index < array.length - 1) {
+              items.push({
+                type: 'text',
+                text: {
+                  content: ',',
+                //   link: null,
+                },
+              });
+            }
+            return items;
+          }).filter(item => item)
+        : [
+            {
+                type: 'text',
+                text: {
+                    content: '',
+                    // link: null,
+                },
+            },
+        ]
         const data = await this.notion.pages.create({
             parent: {
                 database_id: databaseId,
@@ -121,38 +154,7 @@ export class Notion {
                 },
                 'Repository Topics': {
                     type: 'rich_text',
-                    rich_text: repo.repositoryTopics
-                        ? repo.repositoryTopics.flatMap((topic, index, array) => {
-                            const items = [
-                              {
-                                type: 'text',
-                                text: {
-                                  content: topic.name,
-                                //   link: topic ? `https://github.com/topics/${topic.name}` : null,
-                                },
-                              },
-                            ];
-                            
-                            if (index < array.length - 1) {
-                              items.push({
-                                type: 'text',
-                                text: {
-                                  content: ',',
-                                //   link: null,
-                                },
-                              });
-                            }
-                            return items;
-                          }).filter(item => item)
-                        : [
-                            {
-                                type: 'text',
-                                text: {
-                                    content: '',
-                                    // link: null,
-                                },
-                            },
-                        ],
+                    rich_text: richTextArray,
                 },
                 'Starred At': {
                     type: 'date',
