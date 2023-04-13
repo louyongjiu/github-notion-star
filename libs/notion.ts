@@ -77,9 +77,9 @@ export class Notion {
         if (repo.description && repo.description.length >= 2000) {
             repo.description = repo.description.substr(0, 120) + '...'
         }
-        const richTextArray = repo.repositoryTopics?.map((text) => ({
+        const richTextArray = repo.repositoryTopics?.map((topic) => ({
             text: {
-              content: text,
+              content: topic.name,
             },
           }));
         const data = await this.notion.pages.create({
