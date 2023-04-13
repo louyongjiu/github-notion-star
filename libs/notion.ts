@@ -77,6 +77,11 @@ export class Notion {
         if (repo.description && repo.description.length >= 2000) {
             repo.description = repo.description.substr(0, 120) + '...'
         }
+        const richTextArray = repo.repositoryTopics?.map((text) => ({
+            text: {
+              content: text,
+            },
+          }));
         const data = await this.notion.pages.create({
             parent: {
                 database_id: databaseId,
@@ -121,8 +126,8 @@ export class Notion {
                     },
                 },
                 'Repository Topics': {
-                    type: 'multi_select',
-                    multi_select: repo.repositoryTopics || [],
+                    type: 'rich_text',
+                    rich_text: richTextArray
                 },
                 'Starred At': {
                     type: 'date',

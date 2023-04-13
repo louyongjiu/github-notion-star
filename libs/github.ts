@@ -1,6 +1,5 @@
 import { Octokit } from '@octokit/core';
 import { QueryForStarredRepository, Repo, GithubRepositoryTopic, RepositoryTopic } from './types';
-import * as retry from 'retry';
 
 // @ts-ignore
 const githubTopicsFirst = +process.env.REPO_TOPICS_LIMIT || 50;
@@ -63,64 +62,47 @@ export class Github {
     }
 
     private async getStarredRepoAfterCursor(cursor: string, topicFirst: number) {
-        return new Promise((resolve, reject) => {
-            const operation = retry.operation({ retries: 5, factor: 2, minTimeout: 120000 });
-            operation.attempt(async (retryCount) => {
-                console.log(`Rate limited, retryCount ${retryCount}`);
-                try {
-                    const data = await this.client.graphql<{ viewer: QueryForStarredRepository }>(
-                        `
-                  query ($after: String, $topicFirst: Int) {
+        const data = await this.client.graphql<{ viewer: QueryForStarredRepository }>(
+            `
+                query ($after: String, $topicFirst: Int) {
                     viewer {
-                      starredRepositories(first: 100, after: $after) {
-                        pageInfo {
-                          startCursor
-                          endCursor
-                          hasNextPage
-                        }
-                        edges {
-                          starredAt
-                          node {
-                            nameWithOwner
-                            url
-                            description
-                            primaryLanguage {
-                              name
+                        starredRepositories(first: 100, after: $after) {
+                            pageInfo {
+                                startCursor
+                                endCursor
+                                hasNextPage
                             }
-                            repositoryTopics(first: $topicFirst) {
-                              nodes {
-                                topic {
-                                  name
+                            edges {
+                                starredAt
+                                node {
+                                    nameWithOwner
+                                    url
+                                    description
+                                    primaryLanguage {
+                                        name
+                                    }
+                                    repositoryTopics(first: $topicFirst) {
+                                        nodes {
+                                            topic {
+                                                name
+                                            }
+                                        }
+                                    }
+                                    updatedAt
+                                    stargazerCount
                                 }
-                              }
                             }
-                            updatedAt
-                            stargazerCount
-                          }
                         }
-                      }
-                    }
-                  }
-                `,
-                        {
-                            after: cursor,
-                            topicFirst: topicFirst,
-                        },
-                    );
-                    resolve(data.viewer);
-                } catch (err) {
-                    if (err.errors?.[0]?.type === 'RATE_LIMITED') {
-                        if (operation.retry(err)) {
-                            console.log(`Rate limited, retrying in ${operation._opts.minTimeout} ms`);
-                        } else {
-                            reject(err);
-                        }
-                    } else {
-                        reject(err);
                     }
                 }
-            });
-        });
+            `,
+            {
+                after: cursor,
+                topicFirst: topicFirst,
+            },
+        );
+
+        return data.viewer;
     }
 
     private async getLastStarredRepo(last: number, topicFirst: number) {
