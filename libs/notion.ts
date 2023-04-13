@@ -122,34 +122,21 @@ export class Notion {
                 'Repository Topics': {
                     type: 'rich_text',
                     rich_text: repo.repositoryTopics
-                        ? repo.repositoryTopics.flatMap((topic, index, array) => {
-                            const items = [
-                              {
+                        ? repo.repositoryTopics.map(
+                            (topic, index) =>
+                            ({
                                 type: 'text',
                                 text: {
-                                  content: topic.name || '',
-                                  link: topic ? `https://github.com/topics/${topic.name}` : null,
+                                    content: `${topic.name}${index === repo.repositoryTopics.length - 1 ? '' : ','}`,
+                                    link: `https://github.com/topics/${topic.name}`,
                                 },
-                              },
-                            ];
-                            
-                            if (index < array.length - 1) {
-                              items.push({
-                                type: 'text',
-                                text: {
-                                  content: ',',
-                                  link: null,
-                                },
-                              });
-                            }
-                            return items;
-                          }).filter(item => item)
+                            })
+                        )
                         : [
                             {
                                 type: 'text',
                                 text: {
                                     content: '',
-                                    link: null,
                                 },
                             },
                         ],
