@@ -34,7 +34,7 @@ jobs:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           TOKEN_OF_GITHUB: ${{ secrets.TOKEN_OF_GITHUB }}
-          FULLSYNC_LIMIT: 5000
+          FULLSYNC_LIMIT: 50000
           PARTIALSYNC_LIMIT: 100
           REPO_TOPICS_LIMIT: 100
         run: npm start

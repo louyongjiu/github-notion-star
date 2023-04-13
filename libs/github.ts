@@ -66,7 +66,7 @@ export class Github {
             `
                 query ($after: String, $topicFirst: Int) {
                     viewer {
-                        starredRepositories(after: $after) {
+                        starredRepositories(first: 1000, after: $after) {
                             pageInfo {
                                 startCursor
                                 endCursor
