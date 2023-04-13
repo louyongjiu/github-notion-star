@@ -121,15 +121,11 @@ export class Notion {
                 },
                 'Repository Topics': {
                     type: 'rich_text',
-                    rich_text: repo.repositoryTopics ? repo.repositoryTopics.map((topic) => ({
+                    rich_text: [
+                        {
                         type: 'text',
                         text: {
-                            content: topic.name,
-                        },
-                    })) : [{
-                        type: 'text',
-                        text: {
-                            content: '',
+                            content:  repo.repositoryTopics ? repo.repositoryTopics.map((topic) => topic.name).join(',') :'',
                         },
                     }]
                 },
