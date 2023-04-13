@@ -149,6 +149,7 @@ export class Notion {
                                 type: 'text',
                                 text: {
                                     content: '',
+                                    link: null,
                                 },
                             },
                         ],
