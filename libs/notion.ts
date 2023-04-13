@@ -74,14 +74,6 @@ export class Notion {
     }
 
     async insertPage(repo: Repo) {
-        if (repo.description && repo.description.length >= 2000) {
-            repo.description = repo.description.substr(0, 120) + '...'
-        }
-        const richTextArray = repo.repositoryTopics?.map((topic) => ({
-            text: {
-              content: topic.name,
-            },
-          }));
         const data = await this.notion.pages.create({
             parent: {
                 database_id: databaseId,
@@ -114,7 +106,9 @@ export class Notion {
                         {
                             type: 'text',
                             text: {
-                                content: repo.description || '',
+                                content: repo.description && repo.description.length >= 2000
+                                ? repo.description.slice(0, 120) + "..."
+                                : repo.description || "",
                             },
                         },
                     ],
@@ -127,7 +121,17 @@ export class Notion {
                 },
                 'Repository Topics': {
                     type: 'rich_text',
-                    rich_text: richTextArray
+                    rich_text: repo.repositoryTopics ? repo.repositoryTopics.map((topic) => ({
+                        type: 'text',
+                        text: {
+                            content: topic.name,
+                        },
+                    })) : [{
+                        type: 'text',
+                        text: {
+                            content: '',
+                        },
+                    }]
                 },
                 'Starred At': {
                     type: 'date',
