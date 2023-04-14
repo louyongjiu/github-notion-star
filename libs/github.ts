@@ -63,10 +63,9 @@ export class Github {
     }
 
     private async getStarredRepoAfterCursor(cursor: string, topicFirst: number) {
-        return new Promise((resolve, reject) => {
+        return new Promise<QueryForStarredRepository>((resolve, reject) => {
             const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 120000 });
             operation.attempt(async (retryCount) => {
-                console.log(`Rate limited, retryCount ${retryCount}`);
                 try {
                     const data = await this.client.graphql<{ viewer: QueryForStarredRepository }>(
                         `
@@ -111,7 +110,8 @@ export class Github {
                 } catch (err) {
                     if (err.errors?.[0]?.type === 'RATE_LIMITED') {
                         if (operation.retry(err)) {
-                            console.log(`Rate limited, retrying in ${operation._opts.minTimeout} ms`);
+                            console.log(`Rate limited, retryCount ${retryCount}`);
+                            // console.log(`Rate limited, retrying in ${operation.timeouts()} ms`);
                         } else {
                             reject(err);
                         }
