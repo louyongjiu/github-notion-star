@@ -64,7 +64,7 @@ export class Github {
 
     private async getStarredRepoAfterCursor(cursor: string, topicFirst: number) {
         return new Promise((resolve, reject) => {
-            const operation = retry.operation({ retries: 5, factor: 2, minTimeout: 120000 });
+            const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 120000 });
             operation.attempt(async (retryCount) => {
                 console.log(`Rate limited, retryCount ${retryCount}`);
                 try {
