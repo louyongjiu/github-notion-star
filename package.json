@@ -17,6 +17,7 @@
     },
     "homepage": "https://github.com/lcjnil/actions#readme",
     "devDependencies": {
+        "@types/retry": "^0.12.2",
         "prettier": "^2.3.2"
     },
     "dependencies": {
