@@ -1,6 +1,8 @@
 import { Octokit } from '@octokit/core';
 import { QueryForStarredRepository, Repo, GithubRepositoryTopic, RepositoryTopic } from './types';
-import retry from 'retry';
+
+
+var retry = require('retry');
 
 // @ts-ignore
 const githubTopicsFirst = +process.env.REPO_TOPICS_LIMIT || 50;
