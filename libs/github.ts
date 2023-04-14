@@ -109,16 +109,13 @@ export class Github {
                     );
                     resolve(data.viewer);
                 } catch (err) {
-                    if (err.errors?.[0]?.type === 'RATE_LIMITED') {
-                        if (operation.retry(err)) {
-                            console.log(`Rate limited, retryCount ${retryCount}`);
-                            // console.log(`Rate limited, retrying in ${operation.timeouts()} ms`);
-                        } else {
-                            reject(err);
-                        }
+                    if (operation.retry(err)) {
+                        console.log(`retryCount ${retryCount} , error ${err}`);
+                        // console.log(`Rate limited, retrying in ${operation.timeouts()} ms`);
                     } else {
                         reject(err);
                     }
+
                 }
             });
         });
