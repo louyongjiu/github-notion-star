@@ -27,7 +27,7 @@ export class Github {
         const repoList = [];
 
         while (hasNextPage || repoList.length < limit) {
-            const data = await this.getStarredRepoAfterCursor(cursor, githubTopicsFirst);
+            const data = await this.getStarredRepoAfterCursorRetryable(cursor, githubTopicsFirst);
             repoList.push(
                 ...this.transformGithubStarResponse(data),
             );
@@ -63,51 +63,12 @@ export class Github {
         }))
     }
 
-    private async getStarredRepoAfterCursor(cursor: string, topicFirst: number) {
+    private async getStarredRepoAfterCursorRetryable(cursor: string, topicFirst: number) {
         return new Promise<QueryForStarredRepository>((resolve, reject) => {
             const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 120000 });
             operation.attempt(async (retryCount) => {
                 try {
-                    const data = await this.client.graphql<{ viewer: QueryForStarredRepository }>(
-                        `
-                  query ($after: String, $topicFirst: Int) {
-                    viewer {
-                      starredRepositories(first: 100, after: $after) {
-                        pageInfo {
-                          startCursor
-                          endCursor
-                          hasNextPage
-                        }
-                        edges {
-                          starredAt
-                          node {
-                            nameWithOwner
-                            url
-                            description
-                            primaryLanguage {
-                              name
-                            }
-                            repositoryTopics(first: $topicFirst) {
-                              nodes {
-                                topic {
-                                  name
-                                }
-                              }
-                            }
-                            updatedAt
-                            stargazerCount
-                          }
-                        }
-                      }
-                    }
-                  }
-                `,
-                        {
-                            after: cursor,
-                            topicFirst: topicFirst,
-                        },
-                    );
-                    resolve(data.viewer);
+                    resolve(await this.getStarredRepoAfterCursor(cursor, topicFirst))
                 } catch (err) {
                     if (operation.retry(err)) {
                         console.log(`retryCount ${retryCount} , error ${err}`);
@@ -119,6 +80,51 @@ export class Github {
                 }
             });
         });
+    }
+
+
+    private async getStarredRepoAfterCursor(cursor: string, topicFirst: number) {
+        const data = await this.client.graphql<{ viewer: QueryForStarredRepository }>(
+            `
+                query ($after: String, $topicFirst: Int) {
+                    viewer {
+                        starredRepositories(first: 100, after: $after) {
+                            pageInfo {
+                                startCursor
+                                endCursor
+                                hasNextPage
+                            }
+                            edges {
+                                starredAt
+                                node {
+                                    nameWithOwner
+                                    url
+                                    description
+                                    primaryLanguage {
+                                        name
+                                    }
+                                    repositoryTopics(first: $topicFirst) {
+                                        nodes {
+                                            topic {
+                                                name
+                                            }
+                                        }
+                                    }
+                                    updatedAt
+                                    stargazerCount
+                                }
+                            }
+                        }
+                    }
+                }
+            `,
+            {
+                after: cursor,
+                topicFirst: topicFirst,
+            },
+        );
+
+        return data.viewer;
     }
 
     private async getLastStarredRepo(last: number, topicFirst: number) {
