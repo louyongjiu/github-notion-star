@@ -25,15 +25,17 @@ export class Github {
         let cursor = '';
         let hasNextPage = true;
         const repoList = [];
+        let round = 1;
 
         while (hasNextPage || repoList.length < limit) {
             const data = await this.getStarredRepoAfterCursorRetryable(cursor, githubTopicsFirst);
             repoList.push(
                 ...this.transformGithubStarResponse(data),
             );
-
             hasNextPage = data.starredRepositories.pageInfo.hasNextPage;
             cursor = data.starredRepositories.pageInfo.endCursor;
+            console.log(`Github: Get starred repos, round is ${round}, count is ${this.repoList.length}, cursor is ${cursor}, hasNextPage is ${hasNextPage}`);
+            round++;
         }
 
         this.repoList = repoList;
