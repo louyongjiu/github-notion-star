@@ -9,7 +9,8 @@ import _ from 'lodash';
 const databaseId = process.env.NOTION_DATABASE_ID as string;
 
 const NAMESPACE = 'notion-page';
-const OPERATION_BATCH_SIZE = process.env.OPERATION_BATCH_SIZE || 10
+// @ts-ignore
+const OPERATION_BATCH_SIZE = +process.env.OPERATION_BATCH_SIZE || 10
 
 export class Notion {
     private notion: Client;
