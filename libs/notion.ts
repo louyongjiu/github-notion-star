@@ -90,12 +90,12 @@ export class Notion {
                         },
                     ],
                 },
-                Type: {
-                    type: 'select',
-                    select: {
-                        name: 'Star',
-                    },
-                },
+                // Type: {
+                //     type: 'select',
+                //     select: {
+                //         name: 'Star',
+                //     },
+                // },
                 Link: {
                     type: 'url',
                     url: repo.url,
@@ -107,27 +107,31 @@ export class Notion {
                             type: 'text',
                             text: {
                                 content: repo.description && repo.description.length >= 2000
-                                    ? repo.description.slice(0, 120) + "..."
+                                    ? repo.description.slice(0, 1999) + "..."
                                     : repo.description || "",
                             },
                         },
                     ],
                 },
                 'Primary Language': {
-                    type: 'select',
-                    select: {
-                        name: repo?.primaryLanguage?.name || 'null',
-                    },
+                    type: 'rich_text',
+                    rich_text: [
+                        {
+                            type: 'text',
+                            text: {
+                                content: repo?.primaryLanguage?.name || '',
+                            },
+                        }]
                 },
                 'Repository Topics': {
                     type: 'rich_text',
                     rich_text: [
                         {
-                        type: 'text',
-                        text: {
-                            content:  repo.repositoryTopics ? repo.repositoryTopics.map((topic) => topic.name).join(',') :'',
-                        },
-                    }]
+                            type: 'text',
+                            text: {
+                                content: repo.repositoryTopics ? repo.repositoryTopics.map((topic) => topic.name).join(',') : '',
+                            },
+                        }]
                 },
                 'Starred At': {
                     type: 'date',
