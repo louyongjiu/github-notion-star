@@ -2,11 +2,14 @@ import { Client } from '@notionhq/client';
 import { NotionPage, Repo } from './types';
 import { DatabasesQueryResponse } from '@notionhq/client/build/src/api-endpoints';
 import { get, save } from './cache';
+import _ from 'lodash';
+
 
 // TODO: add assertion
 const databaseId = process.env.NOTION_DATABASE_ID as string;
 
 const NAMESPACE = 'notion-page';
+const OPERATION_BATCH_SIZE = process.env.OPERATION_BATCH_SIZE || 10
 
 export class Notion {
     private notion: Client;
@@ -71,6 +74,23 @@ export class Notion {
         });
 
         this.save();
+    }
+
+    async createPages(repoList: Repo[]) {
+        const repoChunks = _.chunk(repoList, OPERATION_BATCH_SIZE)
+        for (const repoBatch of repoChunks) {
+            await Promise.all(
+                repoBatch.map((repo: Repo) =>
+                    this.createPage(repo)
+                )
+            )
+        }
+    }
+
+    async createPage(repo: Repo) {
+        if (!this.hasPage(repo.nameWithOwner)) {
+            await this.insertPage(repo)
+        }
     }
 
     async insertPage(repo: Repo) {
