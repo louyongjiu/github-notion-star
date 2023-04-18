@@ -10,7 +10,7 @@ const databaseId = process.env.NOTION_DATABASE_ID as string;
 
 const NAMESPACE = 'notion-page';
 // @ts-ignore
-const OPERATION_BATCH_SIZE = +process.env.OPERATION_BATCH_SIZE || 10
+const OPERATION_BATCH_SIZE = +process.env.OPERATION_BATCH_SIZE || 5
 
 export class Notion {
     private notion: Client;
@@ -128,7 +128,7 @@ export class Notion {
                             type: 'text',
                             text: {
                                 content: repo.description && repo.description.length >= 2000
-                                    ? repo.description.slice(0, 1999) + "..."
+                                    ? repo.description.slice(0, 1997) + "..."
                                     : repo.description || "",
                             },
                         },
