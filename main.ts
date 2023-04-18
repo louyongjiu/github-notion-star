@@ -5,14 +5,14 @@ import assert from 'assert';
 async function fullSync() {
     await Promise.all([github.fullSync(), notion.fullSyncIfNeeded()]);
 
-    await notion.createPages(github.repoList);
+    // await notion.createPages(github.repoList);
     
-    // for (const repo of github.repoList) {
-    //     if (!notion.hasPage(repo.nameWithOwner)) {
-    //         // console.log(`Start to save page: ${JSON.stringify(repo)}`);
-    //         await notion.insertPage(repo);
-    //     }
-    // }
+    for (const repo of github.repoList) {
+        if (!notion.hasPage(repo.nameWithOwner)) {
+            // console.log(`Start to save page: ${JSON.stringify(repo)}`);
+            await notion.insertPage(repo);
+        }
+    }
 }
 
 async function partialSync() {
