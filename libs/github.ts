@@ -34,7 +34,7 @@ export class Github {
             );
             hasNextPage = data.starredRepositories.pageInfo.hasNextPage;
             cursor = data.starredRepositories.pageInfo.endCursor;
-            console.log(`Github: Get starred repos, round is ${round}, count is ${this.repoList.length}, cursor is ${cursor}, hasNextPage is ${hasNextPage}`);
+            console.log(`Github: Get starred repos, round is ${round}, count is ${repoList.length}, cursor is ${cursor}, hasNextPage is ${hasNextPage}`);
             round++;
         }
 
