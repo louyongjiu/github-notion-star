@@ -73,7 +73,7 @@ export class Github {
                     resolve(await this.getStarredRepoAfterCursor(cursor, topicFirst))
                 } catch (err) {
                     if (operation.retry(err)) {
-                        console.log(`retryCount ${retryCount} , error ${err}`);
+                        console.log(`Github: retryCount ${retryCount} , error ${JSON.stringify(err)}`);
                         // console.log(`Rate limited, retrying in ${operation.timeouts()} ms`);
                     } else {
                         reject(err);

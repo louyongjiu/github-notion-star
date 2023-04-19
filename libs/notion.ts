@@ -1,8 +1,9 @@
 import { Client } from '@notionhq/client';
 import { NotionPage, Repo } from './types';
-import { DatabasesQueryResponse } from '@notionhq/client/build/src/api-endpoints';
+import { DatabasesQueryResponse, PagesCreateResponse } from '@notionhq/client/build/src/api-endpoints';
 import { get, save } from './cache';
 import _ from 'lodash';
+import * as retry from 'retry';
 
 
 // TODO: add assertion
@@ -95,7 +96,37 @@ export class Notion {
     }
 
     async insertPage(repo: Repo) {
-        const data = await this.notion.pages.create({
+        const data = await this.insertNotionPageRetryable(repo);
+
+        this.pages[repo.nameWithOwner] = { id: data.id };
+
+        console.log(`insert page ${repo.nameWithOwner} success, page id is ${data.id}`);
+
+        this.save();
+    }
+
+    
+    private async insertNotionPageRetryable(repo: Repo) {
+        return new Promise<PagesCreateResponse>((resolve, reject) => {
+            const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 10000 });
+            operation.attempt(async (retryCount) => {
+                try {
+                    resolve(await this.insertNotionPage(repo))
+                } catch (err) {
+                    if (operation.retry(err)) {
+                        console.log(`Notion: insert page ${repo.nameWithOwner} fail , retryCount ${retryCount}`);
+                        // console.log(`Rate limited, retrying in ${operation.timeouts()} ms`);
+                    } else {
+                        reject(err);
+                    }
+
+                }
+            });
+        });
+    }
+
+    private async insertNotionPage(repo: Repo) {
+        return await this.notion.pages.create({
             parent: {
                 database_id: databaseId,
             },
@@ -168,11 +199,6 @@ export class Notion {
             },
         });
 
-        this.pages[repo.nameWithOwner] = { id: data.id };
-
-        console.log(`insert page ${repo.nameWithOwner} success, page id is ${data.id}`);
-
-        this.save();
     }
 }
 
