@@ -49,24 +49,53 @@ export class Notion {
 
         let hasNext = true;
         let cursor: string | undefined = undefined;
+        let round = 1;
 
         while (hasNext) {
-            const database: DatabasesQueryResponse = await this.notion.databases.query({
-                database_id: databaseId,
-                page_size: 100,
-                start_cursor: cursor,
-            });
+            const database: DatabasesQueryResponse = await this.getPagesRetryable(cursor);
 
             this.addPages(database.results as NotionPage[]);
             hasNext = database.has_more;
             // @ts-ignore
             cursor = database.next_cursor;
+            console.log(`Notion: Get pages, round is ${round}, count is ${Object.keys(this.pages).length}, cursor is ${cursor}, hasNext is ${hasNext}`);
+            round++;
         }
 
         console.log(`Notion: Get all pages success, count is ${Object.keys(this.pages).length}`);
 
         this.save();
     }
+
+    private async getPagesRetryable(cursor: string | undefined) {
+        return new Promise<DatabasesQueryResponse>((resolve, reject) => {
+            const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 10000 });
+            operation.attempt(async (retryCount) => {
+                try {
+                    resolve(await this.getPages(cursor))
+                } catch (err) {
+                    if (operation.retry(err)) {
+                        console.log(`Notion: retryCount ${retryCount} , error ${JSON.stringify(err)}`);
+                        // console.log(`Rate limited, retrying in ${operation.timeouts()} ms`);
+                    } else {
+                        reject(err);
+                    }
+
+                }
+            });
+        });
+    }
+
+
+    private async getPages(cursor: string | undefined){
+        const database: DatabasesQueryResponse = await this.notion.databases.query({
+            database_id: databaseId,
+            page_size: 100,
+            start_cursor: cursor,
+        });
+        return database;
+    }
+
 
     addPages(pages: NotionPage[]) {
         pages.forEach((page) => {
