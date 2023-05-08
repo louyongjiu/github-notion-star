@@ -1,6 +1,6 @@
 import { PageObjectResponse, RichTextItemResponse, SelectPropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-export interface RepositoryTopic extends SelectPropertyItemObjectResponse {
+export interface RepositoryTopic {
     name: string;
 }
 
