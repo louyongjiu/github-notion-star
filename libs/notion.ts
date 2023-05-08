@@ -1,6 +1,6 @@
 import { Client } from '@notionhq/client';
 import { NotionPage, Repo } from './types';
-import { DatabasesQueryResponse, PagesCreateResponse } from '@notionhq/client/build/src/api-endpoints';
+import { QueryDatabaseResponse, CreatePageResponse } from '@notionhq/client/build/src/api-endpoints';
 import { get, save } from './cache';
 import _ from 'lodash';
 import * as retry from 'retry';
@@ -52,7 +52,7 @@ export class Notion {
         let round = 1;
 
         while (hasNext) {
-            const database: DatabasesQueryResponse = await this.getPagesRetryable(cursor);
+            const database: QueryDatabaseResponse = await this.getPagesRetryable(cursor);
 
             this.addPages(database.results as NotionPage[]);
             hasNext = database.has_more;
@@ -68,7 +68,7 @@ export class Notion {
     }
 
     private async getPagesRetryable(cursor: string | undefined) {
-        return new Promise<DatabasesQueryResponse>((resolve, reject) => {
+        return new Promise<QueryDatabaseResponse>((resolve, reject) => {
             const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 10000 });
             operation.attempt(async (retryCount) => {
                 try {
@@ -88,7 +88,7 @@ export class Notion {
 
 
     private async getPages(cursor: string | undefined){
-        const database: DatabasesQueryResponse = await this.notion.databases.query({
+        const database: QueryDatabaseResponse = await this.notion.databases.query({
             database_id: databaseId,
             page_size: 100,
             start_cursor: cursor,
@@ -136,7 +136,7 @@ export class Notion {
 
     
     private async insertNotionPageRetryable(repo: Repo) {
-        return new Promise<PagesCreateResponse>((resolve, reject) => {
+        return new Promise<CreatePageResponse>((resolve, reject) => {
             const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 10000 });
             operation.attempt(async (retryCount) => {
                 try {

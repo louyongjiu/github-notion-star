@@ -1,6 +1,6 @@
-import { Page, TitlePropertyValue, URLPropertyValue, SelectOptionWithName } from '@notionhq/client/build/src/api-types';
+import { PageObjectResponse, RichTextItemResponse, SelectPropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-export interface RepositoryTopic extends SelectOptionWithName {
+export interface RepositoryTopic extends SelectPropertyItemObjectResponse {
     name: string;
 }
 
@@ -48,9 +48,17 @@ export interface QueryForStarredRepository {
     };
 }
 
-export interface NotionPage extends Page {
+export interface NotionPage extends PageObjectResponse {
     properties: {
-        Name: TitlePropertyValue;
-        Link: URLPropertyValue;
+        Name: {
+            type: "title";
+            title: Array<RichTextItemResponse>;
+            id: string;
+        };
+        Link: {
+            type: "url";
+            url: string | null;
+            id: string;
+        };
     };
 }
