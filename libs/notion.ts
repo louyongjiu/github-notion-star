@@ -69,7 +69,7 @@ export class Notion {
 
     private async getPagesRetryable(cursor: string | undefined) {
         return new Promise<QueryDatabaseResponse>((resolve, reject) => {
-            const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 10000 });
+            const operation: retry.RetryOperation = retry.operation({ retries: 5, factor: 2, minTimeout: 5000 });
             operation.attempt(async (retryCount) => {
                 try {
                     resolve(await this.getPages(cursor))
